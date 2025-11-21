@@ -1,0 +1,41 @@
+parameters:
+- name: GROUP_ID
+- name: ARTIFACT_ID
+- name: VERSION
+
+steps:
+- script: |
+    GROUP_ID=${{ parameters.GROUP_ID }}
+    ARTIFACT_ID=${{ parameters.ARTIFACT_ID }}
+    VERSION=${{ parameters.VERSION }}
+
+    DIR_SETTINGS="$(Build.SourcesDirectory)/utils/settings-azure-artifacts.xml"
+    DIR_DOWNLOAD="$(Build.SourcesDirectory)/artifact-download"
+
+    echo "[INFO] Downloading artifact from Azure Artifacts..."
+    mkdir -p ${DIR_DOWNLOAD}
+    mvn dependency:get \
+      -Dartifact=${GROUP_ID}:${ARTIFACT_ID}:${VERSION} \
+      -DrepositoryId=$(ID_REPOSITORY_AZURE_ARTIFACTS) \
+      -Durl=$(AZURE_ARTIFACTS_URL) \
+      -Ddest=${DIR_DOWNLOAD} \
+      -Dtransitive=false \
+      -DgroupId=${GROUP_ID} \
+      -DartifactId=${ARTIFACT_ID} \
+      -Dversion=${VERSION}
+      -s ${DIR_SETTINGS}
+
+    mvn dependency:copy \
+      -Dartifact=${GROUP_ID}:${ARTIFACT_ID}:${VERSION} \
+      -DgroupId=${GROUP_ID} \
+      -DartifactId=${ARTIFACT_ID} \
+      -Dversion=${VERSION} \
+      -DoutputDirectory=$DIR_DOWNLOAD \
+      -s ${DIR_SETTINGS}
+
+    DIR_JAR=$(ls $DIR_DOWNLOAD/*.jar | head -n 1)
+    echo "[INFO] Find JAR file:"
+    ls -lah $DIR_DOWNLOAD
+    echo "##vso[task.setvariable variable=DIR_JAR]$DIR_JAR"
+
+  displayName: "Maven Get JAR from Azure Artifacts"

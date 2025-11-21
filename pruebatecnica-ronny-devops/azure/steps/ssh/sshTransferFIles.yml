@@ -1,0 +1,16 @@
+steps:
+- script: |
+    DIR_SCRIPT_UPDATE="$(Build.SourcesDirectory)/utils/scripts-bash"
+    echo "[INFO] Directory scripts: $DIR_SCRIPT_UPDATE"
+    echo "[INFO] Directory JAR: $(DIR_JAR)"
+
+    echo "[INFO] Prepare SSH Key for SCP transfer..."
+    chmod 600 $(sshKey.secureFilePath)
+    
+    echo "[INFO] Transferring JAR file to remote server..."
+    scp -o StrictHostKeyChecking=no -i $(sshKey.secureFilePath) $(DIR_JAR) $(SHH_USER)@$(SSH_HOST):/tmp/app.jar
+
+    echo "[INFO] Transferring directory scripts to remote server..."
+    scp -r -o StrictHostKeyChecking=no -i $(sshKey.secureFilePath) $DIR_SCRIPT_UPDATE $(SHH_USER)@$(SSH_HOST):/tmp/
+
+  displayName: "Transfer files to remote server"

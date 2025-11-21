@@ -1,0 +1,59 @@
+parameters:
+- name: PATH_PROJECT
+  type: string
+  default: './'
+- name: PROJECT_KEY_SONAR
+  type: string
+- name: GROUP_ID
+  type: string
+  default: 'com.zfactorial'
+- name: ARTIFACT_ID
+  type: string 
+  default: 'springboot-app'
+- name: VERSION
+  type: string
+  default: '1.0.0'
+
+stages:
+  - stage: build
+    displayName: "Build Stage"
+    dependsOn: []
+    condition: succeeded()
+    jobs:
+      - template: ../jobs/buildAppSpringboot.yml
+        parameters:
+          PATH_PROJECT: ${{ parameters.PATH_PROJECT }}
+          GROUP_ID: ${{ parameters.GROUP_ID }}
+          ARTIFACT_ID: ${{ parameters.ARTIFACT_ID }}
+          VERSION: ${{ parameters.VERSION }}
+
+  - stage: sast
+    displayName: "Sast Stage"
+    dependsOn: build
+    condition: succeeded()
+    jobs:
+      - template: ../jobs/sastAppSpringboot.yml
+        parameters:
+          PROJECT_KEY_SONAR: ${{ parameters.PROJECT_KEY_SONAR }}
+
+  - stage: release
+    displayName: "Release Stage"
+    dependsOn: sast
+    condition: succeeded()
+    jobs:
+      - template: ../jobs/releaseAppSpringboot.yml
+        parameters:
+          GROUP_ID: ${{ parameters.GROUP_ID }}
+          ARTIFACT_ID: ${{ parameters.ARTIFACT_ID }}
+          VERSION: ${{ parameters.VERSION }}
+
+  - stage: deploy
+    displayName: "Deploy Stage"
+    dependsOn: release
+    condition: succeeded()
+    jobs:
+      - template: ../jobs/deployAppSpringboot.yml
+        parameters:
+          GROUP_ID: ${{ parameters.GROUP_ID }}
+          ARTIFACT_ID: ${{ parameters.ARTIFACT_ID }}
+          VERSION: ${{ parameters.VERSION }}

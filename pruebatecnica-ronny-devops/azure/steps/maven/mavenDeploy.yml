@@ -1,0 +1,29 @@
+parameters:
+- name: GROUP_ID
+- name: ARTIFACT_ID
+- name: VERSION
+steps:
+- script: |
+    GROUP_ID=${{ parameters.GROUP_ID }}
+    ARTIFACT_ID=${{ parameters.ARTIFACT_ID }}
+    VERSION=${{ parameters.VERSION }}
+
+    DIR_SETTINGS="$(Build.SourcesDirectory)/utils/settings-azure-artifacts.xml"
+    DIR_PROJECT="$(Agent.BuildDirectory)/springboot-app-compiled/target"
+
+    FILE_JAR=$(ls $DIR_PROJECT/*.jar | head -n 1)
+    echo "[INFO] Find JAR file: $FILE_JAR"
+    echo "[INFO] Deploying artifact to Azure Artifacts..."
+    echo "[EXEC] mvn deploy:deploy-file -Dpackaging=jar -DgeneratePom=true -Dfile=${FILE_JAR} -DgroupId=${GROUP_ID} -DartifactId=${ARTIFACT_ID} -Dversion=${VERSION} -DrepositoryId=$(ID_REPOSITORY_AZURE_ARTIFACTS) -Durl=$(AZURE_ARTIFACTS_URL) -s ${DIR_SETTINGS}"
+    mvn deploy:deploy-file \
+      -Dpackaging=jar \
+      -DgeneratePom=true \
+      -Dfile=${FILE_JAR} \
+      -DgroupId=${GROUP_ID} \
+      -DartifactId=${ARTIFACT_ID} \
+      -Dversion=${VERSION} \
+      -DrepositoryId=$(ID_REPOSITORY_AZURE_ARTIFACTS) \
+      -Durl=$(AZURE_ARTIFACTS_URL) \
+      -s ${DIR_SETTINGS}
+
+  displayName: "Maven Deploy to Azure Artifacts"

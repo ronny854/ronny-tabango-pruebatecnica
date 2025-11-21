@@ -1,0 +1,6 @@
+steps:
+- script: |
+    DIR_SETTINGS="$(Build.SourcesDirectory)/utils/settings-azure-artifacts.xml"
+    sed -i "s|_ARTIFACTS_TOKEN_|$(ARTIFACTS_TOKEN)|g" ${DIR_SETTINGS}
+    echo "[INFO] File settings.xml generated at: ${DIR_SETTINGS}"
+  displayName: "Generated settings.xml for Maven"

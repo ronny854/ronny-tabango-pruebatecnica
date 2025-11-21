@@ -1,0 +1,20 @@
+parameters:
+- name: PROJECT_KEY_SONAR
+  type: string
+
+jobs:
+  - job: SastJob
+    displayName: "Analisys App"
+    pool:
+      vmImage: ubuntu-latest
+    container:
+      image: ronnyt854/pruebatecnica-java21:latest
+    variables:
+      - group: devops_group
+      - name: PROJECT_KEY
+        value: 'zfactorial_${{ parameters.PROJECT_KEY_SONAR }}'
+    steps:
+      - checkout: none
+      - download: current
+        artifact: springboot-app-compiled
+      - template: ../steps/sonar/sonarQubeAnalisysSpringBootApp.yml

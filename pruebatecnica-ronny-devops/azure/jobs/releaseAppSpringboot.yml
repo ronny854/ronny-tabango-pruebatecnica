@@ -1,0 +1,28 @@
+parameters:
+- name: GROUP_ID
+- name: ARTIFACT_ID
+- name: VERSION
+
+jobs:
+  - job: ReleaseJob
+    displayName: "Deploy app to Azure Artifacts"
+    pool:
+      vmImage: ubuntu-latest
+    container:
+      image: ronnyt854/pruebatecnica-java21:latest
+    variables:
+      - group: devops_group
+      - name: ID_REPOSITORY_AZURE_ARTIFACTS
+        value: 'feed-artifacts-java'
+      - name: AZURE_ARTIFACTS_URL
+        value: 'https://pkgs.dev.azure.com/zfactorial/Zfactorial_Corp/_packaging/feed-artifacts-java/maven/v1'
+    steps:
+      - checkout: templates
+      - download: current
+        artifact: springboot-app-compiled
+      - template: ../steps/maven/generatedSettingsMaven.yml
+      - template: ../steps/maven/mavenDeploy.yml
+        parameters:
+          GROUP_ID: ${{ parameters.GROUP_ID }}
+          ARTIFACT_ID: ${{ parameters.ARTIFACT_ID }}
+          VERSION: ${{ parameters.VERSION }}

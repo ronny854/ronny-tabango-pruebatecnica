@@ -1,0 +1,20 @@
+parameters:
+- name: PATH_PROJECT
+  type: string
+  default: './'
+- name: GROUP_ID
+- name: ARTIFACT_ID
+- name: VERSION
+
+steps:
+- script: |
+    GROUP_ID=${{ parameters.GROUP_ID }}
+    ARTIFACT_ID=${{ parameters.ARTIFACT_ID }}
+    VERSION=${{ parameters.VERSION }}
+    cd ${{ parameters.PATH_PROJECT }}
+    echo "[EXEC] mvn clean package -DskipTests -DgroupId=${GROUP_ID} -DartifactId=${ARTIFACT_ID} -Dversion=${VERSION}"
+    mvn clean package -DskipTests -DgroupId=${GROUP_ID} -DartifactId=${ARTIFACT_ID} -Dversion=${VERSION}
+  displayName: "Maven clean package"
+- script: |
+    ls ${{ parameters.PATH_PROJECT }}/target
+  displayName: "List artifacts generated"

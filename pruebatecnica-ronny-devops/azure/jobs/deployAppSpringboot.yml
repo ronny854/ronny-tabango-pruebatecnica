@@ -1,0 +1,37 @@
+parameters:
+- name: GROUP_ID
+- name: ARTIFACT_ID
+- name: VERSION
+
+jobs:
+  - job: BuildJob
+    displayName: "Deploy App to Remote Server"
+    pool: linux-agents   #Grupo de agentes auto-hospedados que comparten red con el servidor remoto en entorno local docker solo para pruebas
+    variables:
+      - group: devops_group
+      - name: ID_REPOSITORY_AZURE_ARTIFACTS
+        value: 'feed-artifacts-java'
+      - name: AZURE_ARTIFACTS_URL
+        value: 'https://pkgs.dev.azure.com/zfactorial/Zfactorial_Corp/_packaging/feed-artifacts-java/maven/v1'
+    steps:
+      - checkout: templates
+      - task: DownloadSecureFile@1
+        displayName: 'Donwload ssh key'
+        name: sshKey
+        inputs:
+          secureFile: 'remote-server-key'
+      - template: ../steps/maven/generatedSettingsMaven.yml
+      - template: ../steps/maven/mavenGetJar.yml
+        parameters:
+          GROUP_ID: ${{ parameters.GROUP_ID }}
+          ARTIFACT_ID: ${{ parameters.ARTIFACT_ID }}
+          VERSION: ${{ parameters.VERSION }}
+      - template: ../steps/ssh/sshTransferFIles.yml
+      - template: ../steps/ssh/sshExecuteScript.yml
+        parameters:
+          SCRIPT_NAME: 'updated_jar.sh'
+          TASK_DISPLAY_NAME: 'Execute updated_jar.sh on remote server'
+      - template: ../steps/ssh/sshExecuteScript.yml
+        parameters:
+          SCRIPT_NAME: 'health_check.sh'
+          TASK_DISPLAY_NAME: 'Execute health_check.sh on remote server'

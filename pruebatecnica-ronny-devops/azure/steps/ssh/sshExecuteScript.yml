@@ -1,0 +1,9 @@
+parameters:
+- name: SCRIPT_NAME
+- name: TASK_DISPLAY_NAME
+
+steps:
+- script: |
+    echo "[INFO] Executing script ${{ parameters.SCRIPT_NAME }} on remote server..."
+    ssh -o StrictHostKeyChecking=no -i $(sshKey.secureFilePath) $(SHH_USER)@$(SSH_HOST) "bash /tmp/scripts-bash/${{ parameters.SCRIPT_NAME }}"
+  displayName: ${{ parameters.TASK_DISPLAY_NAME }}

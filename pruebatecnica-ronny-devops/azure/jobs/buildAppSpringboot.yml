@@ -1,0 +1,25 @@
+parameters:
+- name: PATH_PROJECT
+  type: string
+  default: './'
+- name: GROUP_ID
+- name: ARTIFACT_ID
+- name: VERSION
+
+jobs:
+  - job: BuildJob
+    displayName: "Build App"
+    pool:
+      vmImage: ubuntu-latest
+    container:
+      image: ronnyt854/pruebatecnica-java21:latest
+
+    steps:
+      - template: ../steps/maven/mavenPackage.yml
+        parameters:
+          PATH_PROJECT: ${{ parameters.PATH_PROJECT }}
+          GROUP_ID: ${{ parameters.GROUP_ID }}
+          ARTIFACT_ID: ${{ parameters.ARTIFACT_ID }}
+          VERSION: ${{ parameters.VERSION }}
+      - publish: ${{ parameters.PATH_PROJECT }}
+        artifact: springboot-app-compiled

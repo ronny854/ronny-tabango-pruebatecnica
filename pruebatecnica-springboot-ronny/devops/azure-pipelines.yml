@@ -1,0 +1,24 @@
+parameters:
+- name: PATH_PROJECT
+  default: 'crud-simple-ronny'
+- name: PROJECT_KEY_SONAR
+  default: 'pruebatecnica-springboot-ronny'
+
+trigger:
+- main
+- develop
+
+resources:
+  repositories:
+    - repository: templates
+      type: git
+      name: pruebatecnica-ronny-devops
+      ref: refs/tags/release-1.0.0
+stages:
+  - template: azure/templates/SpringBootServiceTemplate.yml@templates
+    parameters:
+      PATH_PROJECT: ${{ parameters.PATH_PROJECT }}
+      PROJECT_KEY_SONAR: ${{ parameters.PROJECT_KEY_SONAR }}
+      GROUP_ID: 'com.pruebatecnica'
+      ARTIFACT_ID: 'crud-simple-ronny'
+      VERSION: '2.0.0-SNAPSHOT'
